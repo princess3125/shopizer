@@ -54,7 +54,7 @@ class LoginApiTest {
         // asString() does not parse the body, so a wrong content-type is not a problem
         String body = r.asString();
 
-        assertThat(r.statusCode()).isIn(400, 401, 403);
+        assertThat(r.statusCode()).isEqualTo(401);
         assertThat(body).contains("Bad credentials");
         assertThat(body).doesNotContain("token");
     }
@@ -65,7 +65,7 @@ class LoginApiTest {
 
         System.out.println(">>> unknown user: status=" + r.statusCode() + " body=" + r.asString());
 
-        assertThat(r.statusCode()).isIn(400, 401, 403);
+        assertThat(r.statusCode()).isEqualTo(401);
         assertThat(r.asString()).doesNotContain("token");
     }
 
@@ -75,6 +75,6 @@ class LoginApiTest {
 
         System.out.println(">>> empty body: status=" + r.statusCode() + " body=" + r.asString());
 
-        assertThat(r.statusCode()).isIn(400, 401, 403, 500);
+        assertThat(r.statusCode()).isEqualTo(401);
     }
 }
