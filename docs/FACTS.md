@@ -7,7 +7,12 @@
 - POST /api/v1/private/product: thiếu tồn kho -> 400 "product must have at least one availability".
   Body đầy đủ có visible=true, available=true, dateAvailable, productShipeable=false, categories[] và khối inventory{sku, quantity, price{price, defaultPrice}} -> 201 {"id": <number>}.
   DELETE /api/v1/private/product/{id} -> 200.
-- POST /api/v1/cart body {"product": <sku>, "quantity": n}; checkout là PersistableAnonymousOrder. CHƯA xác minh.
+- POST /api/v1/cart body {"product": <sku>, "quantity": n}:
+  - SKU hợp lệ, SL n > 0 -> 201 {"code": <hash>, "total": ..., "quantity": ..., "products": [...]}.
+    GET /api/v1/cart/{code} -> 200 trả về giỏ hàng tương ứng.
+  - SKU không tồn tại -> 400 {"errorCode":"500","message":"Cannot get product with sku [...]"}.
+  - Điểm quan sát P-08 (mức độ chưa xác minh): giỏ hàng chấp nhận SL = 0 và SL < 0 (201, total = 0.00 hoặc âm); CHƯA XÁC MINH checkout có từ chối hay không.
+  - Checkout là PersistableAnonymousOrder. CHƯA XÁC MINH.
 - Tổng 309 endpoint; 68 GET không tham số đường dẫn đã được quét.
 - Lỗi đã biết (chưa xác minh nguyên nhân): GET content/boxes, content/pages (public và private) -> 500;
   GET sec/private/groups, sec/private/permissions -> 200 khi không có token; GET auth/refresh không token -> 500.
