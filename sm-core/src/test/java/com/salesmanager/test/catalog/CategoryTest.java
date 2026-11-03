@@ -33,7 +33,7 @@ public class CategoryTest extends com.salesmanager.test.common.AbstractSalesMana
 	    materingstuff.setMerchantStore(store);
 	    materingstuff.setCode("materingstuff");
 
-	    CategoryDescription bookEnglishDescription = new CategoryDescription();
+		CategoryDescription bookEnglishDescription = new CategoryDescription();
 	    bookEnglishDescription.setName("Book");
 	    bookEnglishDescription.setCategory(materingstuff);
 	    bookEnglishDescription.setLanguage(en);
