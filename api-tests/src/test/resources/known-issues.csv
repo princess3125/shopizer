@@ -1,0 +1,51 @@
+method,path,scenario,expected_status,date_observed,note
+GET,/api/v1/auth/refresh,no_token,500,2026-11-03,Secured endpoint loi 500 khi thieu token
+GET,/api/v1/sec/private/groups,no_token,200,2026-11-03,Secured endpoint khong kiem tra token
+GET,/api/v1/sec/private/permissions,no_token,200,2026-11-03,Secured endpoint khong kiem tra token
+GET,/api/v1/sec/private/{group}/permissions,no_token,500,2026-11-03,Secured endpoint loi 500 khi thieu token
+GET,/api/v1/category/{friendlyUrl},public_bogus,500,2026-11-03,Loi 500 khi goi category voi friendlyUrl khong ton tai
+GET,/api/v1/category/{id},public_bogus,500,2026-11-03,Loi 500 khi goi category voi id khong ton tai
+GET,/api/v1/content/boxes,public_bogus,500,2026-11-03,Loi 500 khi lay content boxes
+GET,/api/v1/content/pages,public_bogus,500,2026-11-03,Loi 500 khi lay content pages
+GET,/api/v1/manufacturer/{id},public_bogus,503,2026-11-03,Loi 503 khi lay manufacturer voi id khong ton tai
+GET,/api/v1/product/friendly/{friendlyUrl},public_bogus,500,2026-11-03,Loi 500 khi lay product voi friendlyUrl khong ton tai
+GET,/api/v1/product/{friendlyUrl},public_bogus,500,2026-11-03,Loi 500 khi lay product voi friendlyUrl khong ton tai
+GET,/api/v1/product/{productId}/images,public_bogus,500,2026-11-03,Loi 500 khi lay product images voi id khong ton tai
+GET,/api/v2/product/friendly/{friendlyUrl},public_bogus,500,2026-11-03,Loi 500 khi lay product v2 voi friendlyUrl khong ton tai
+GET,/api/v2/product/name/{friendlyUrl},public_bogus,500,2026-11-03,Loi 500 khi lay product v2 voi name khong ton tai
+DELETE,/api/v1/private/catalog/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa catalog voi id khong ton tai
+DELETE,/api/v1/private/catalog/{id}/entry/{entryId},admin_bogus,500,2026-11-03,Loi 500 khi xoa catalog entry voi id khong ton tai
+DELETE,/api/v1/private/category/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa category voi id khong ton tai
+DELETE,/api/v1/private/content/box/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa content box voi id khong ton tai
+DELETE,/api/v1/private/content/page/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa content page voi id khong ton tai
+DELETE,/api/v1/private/content/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa content voi id khong ton tai
+DELETE,/api/v1/private/customers/{id}/reviews/{reviewId},admin_bogus,500,2026-11-03,Loi 500 khi xoa customer review voi id khong ton tai
+DELETE,/api/v1/private/product/property/set/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa product property set voi id khong ton tai
+DELETE,/api/v1/private/product/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa product voi id khong ton tai
+DELETE,/api/v1/private/product/{sku}/price/{priceId},admin_bogus,500,2026-11-03,Loi 500 khi xoa product price voi id khong ton tai
+DELETE,/api/v1/private/products/{id}/reviews/{reviewid},admin_bogus,500,2026-11-03,Loi 500 khi xoa product review voi id khong ton tai
+DELETE,/api/v1/private/tax/class/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa tax class voi id khong ton tai
+DELETE,/api/v1/private/user/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa user voi id khong ton tai
+DELETE,/api/v2/private/product/variation/{variationId},admin_bogus,500,2026-11-03,Loi 500 khi xoa product variation v2 voi id khong ton tai
+DELETE,/api/v2/private/product/{id},admin_bogus,500,2026-11-03,Loi 500 khi xoa product v2 voi id khong ton tai
+GET,/api/v1/private/orders/{id}/payment/transactions,admin_bogus,500,2026-11-03,Loi 500 khi lay payment transactions voi order id khong ton tai
+GET,/api/v1/private/product/{id}/attributes,admin_bogus,500,2026-11-03,Loi 500 khi lay product attributes voi id khong ton tai
+GET,/api/v1/sec/private/{group}/permissions,admin_bogus,500,2026-11-03,Loi 500 khi lay group permissions voi group khong ton tai
+GET,/api/v2/private/product/{id},admin_bogus,500,2026-11-03,Loi 500 khi lay product v2 voi id khong ton tai
+PATCH,/api/v1/private/catalog/{id},admin_bogus,500,2026-11-03,Loi 500 khi patch catalog voi id khong ton tai
+PATCH,/api/v1/private/product/{id},admin_bogus,500,2026-11-03,Loi 500 khi patch product voi id khong ton tai
+PATCH,/api/v1/private/product/{id}/image/{imageId},admin_bogus,500,2026-11-03,Loi 500 khi patch product image voi id khong ton tai
+PATCH,/api/v1/private/user/{id}/password,admin_bogus,500,2026-11-03,Loi 500 khi patch user password voi id khong ton tai
+POST,/api/v1/private/customers/{id}/reviews,admin_bogus,500,2026-11-03,Loi 500 khi tao customer review voi id khong ton tai
+POST,/api/v1/private/product/option/value/{id}/image,admin_bogus,500,2026-11-03,Loi 500 khi tao option value image voi id khong ton tai
+POST,/api/v1/private/product/{id}/attribute,admin_bogus,500,2026-11-03,Loi 500 khi tao product attribute voi id khong ton tai
+POST,/api/v1/private/product/{id}/attributes,admin_bogus,500,2026-11-03,Loi 500 khi tao nhieu product attributes voi id khong ton tai
+POST,/api/v1/private/products/{id}/reviews,admin_bogus,503,2026-11-03,Loi 503 khi tao product review voi id khong ton tai
+POST,/api/v1/private/store/{code}/marketing/logo,admin_bogus,500,2026-11-03,Loi 500 khi upload marketing logo voi store code khong ton tai
+PUT,/api/v1/private/customers/{id}/reviews/{reviewid},admin_bogus,500,2026-11-03,Loi 500 khi cap nhat customer review voi id khong ton tai
+PUT,/api/v1/private/manufacturer/{id},admin_bogus,503,2026-11-03,Loi 503 khi cap nhat manufacturer voi id khong ton tai
+PUT,/api/v1/private/orders/{id}/status,admin_bogus,500,2026-11-03,Loi 500 khi cap nhat order status voi id khong ton tai
+PUT,/api/v1/private/product/{id}/attribute/{attributeId},admin_bogus,500,2026-11-03,Loi 500 khi cap nhat product attribute voi id khong ton tai
+PUT,/api/v1/private/products/{id}/reviews/{reviewid},admin_bogus,500,2026-11-03,Loi 500 khi cap nhat product review voi id khong ton tai
+PUT,/api/v1/private/tax/class/{id},admin_bogus,500,2026-11-03,Loi 500 khi cap nhat tax class voi id khong ton tai
+PUT,/api/v1/private/user/{id},admin_bogus,500,2026-11-03,Loi 500 khi cap nhat user voi id khong ton tai

@@ -1,0 +1,123 @@
+name: CI Multi-tier Testing
+
+on:
+  push:
+    branches: [ "do-an-kiem-thu" ]
+  pull_request:
+    branches: [ "do-an-kiem-thu" ]
+
+jobs:
+  build:
+    name: Build & Install Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Build and Install Whole Repository
+        run: ./mvnw -B -DskipTests install
+
+  api:
+    name: API Integration Tests
+    needs: build
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: SALESMANAGER
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -h localhost -uroot -p${{ secrets.DB_PASSWORD }}" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Generate database.properties from Secrets
+        run: |
+          mkdir -p sm-shop/src/main/resources
+          cat <<EOF > sm-shop/src/main/resources/database.properties
+          db.jdbcUrl=jdbc:mysql://127.0.0.1:3306/SALESMANAGER?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+          db.user=root
+          db.password=${{ secrets.DB_PASSWORD }}
+          db.driverClass=com.mysql.cj.jdbc.Driver
+          hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+          db.show.sql=false
+          db.preferredTestQuery=SELECT 1
+          db.schema=SALESMANAGER
+          hibernate.hbm2ddl.auto=update
+          db.initialPoolSize=4
+          db.minPoolSize=4
+          db.maxPoolSize=8
+          EOF
+
+      - name: Package sm-shop with database.properties
+        run: ./mvnw -B -DskipTests -f sm-shop/pom.xml package
+
+      - name: Start Shopizer Backend in Background
+        run: |
+          nohup java -jar sm-shop/target/shopizer.jar > backend.log 2>&1 &
+          echo "Shopizer backend launched with PID: $!"
+
+      - name: Wait for Backend to be Ready (max 5 minutes)
+        run: |
+          echo "Waiting for backend at http://localhost:8080/v2/api-docs..."
+          for i in {1..60}; do
+            if curl -s -f http://localhost:8080/v2/api-docs > /dev/null; then
+              echo "Backend is ready after $((i * 5)) seconds!"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Timeout waiting for backend (5 minutes)!"
+              echo "=== BACKEND LOG ==="
+              cat backend.log
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Run API Tests
+        run: |
+          ./mvnw -B -f api-tests/pom.xml test \
+            -Dapi.baseUrl=http://localhost:8080 \
+            -Dapi.user=admin@shopizer.com \
+            -Dapi.password=${{ secrets.ADMIN_PASSWORD }}
+
+      - name: Upload Surefire Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-surefire-reports
+          path: api-tests/target/surefire-reports/
+          if-no-files-found: ignore
+
+      - name: Upload Backend Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-log
+          path: backend.log
+          if-no-files-found: ignore

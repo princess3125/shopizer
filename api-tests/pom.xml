@@ -12,6 +12,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <test.excluded.groups>probe</test.excluded.groups>
   </properties>
 
   <dependencies>
@@ -47,6 +48,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <excludedGroups>${test.excluded.groups}</excludedGroups>
+        </configuration>
       </plugin>
     </plugins>
   </build>

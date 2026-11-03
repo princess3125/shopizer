@@ -33,6 +33,6 @@ abstract class ApiBase {
     static String preview(String body) {
         if (body == null) return "null";
         String s = body.replace("\n", " ");
-        return s.length() > 300 ? s.substring(0, 300) + "..." : s;
+        return s.length() > 700 ? s.substring(0, 700) + "..." : s;
     }
 }
