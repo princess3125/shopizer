@@ -36,11 +36,11 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ci_temp_password
           MYSQL_DATABASE: SALESMANAGER
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping -h localhost -uroot -p${{ secrets.DB_PASSWORD }}" --health-interval=10s --health-timeout=5s --health-retries=5
+        options: --health-cmd="mysqladmin ping -h localhost -uroot -pci_temp_password" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout Source Code
@@ -55,6 +55,10 @@ jobs:
 
       - name: Make Maven Wrapper Executable
         run: chmod +x mvnw
+
+      - name: Synchronize MySQL Root Password with Secret
+        run: |
+          docker exec $(docker ps -q -f ancestor=mysql:8) mysql -u root -pci_temp_password -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}'; ALTER USER 'root'@'localhost' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}'; FLUSH PRIVILEGES;"
 
       - name: Generate database.properties from Secrets
         run: |
