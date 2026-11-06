@@ -153,7 +153,7 @@ jobs:
           EOF
 
       - name: Package sm-shop with database.properties
-        run: ./mvnw -B -DskipTests -f sm-shop/pom.xml package
+        run: ./mvnw -B -DskipTests -pl sm-shop -am package
 
       - name: Start Shopizer Backend in Background
         run: |
