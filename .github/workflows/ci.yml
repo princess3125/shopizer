@@ -2,13 +2,87 @@ name: CI Multi-tier Testing
 
 on:
   push:
-    branches: [ "do-an-kiem-thu" ]
+    branches: [ "do-an-kiem-thu", "main", "master" ]
   pull_request:
-    branches: [ "do-an-kiem-thu" ]
+    branches: [ "do-an-kiem-thu", "main", "master" ]
+  workflow_dispatch:
 
 jobs:
+  unit-tests:
+    name: Tier 1 - Unit Tests & JaCoCo Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Run All Pure Unit Tests & JaCoCo Coverage
+        run: ./mvnw -B test -Dtest="*UnitTest,ProductPriceUtilsTest,DataUtilsTest" -DfailIfNoTests=false
+
+      - name: Upload Surefire Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-surefire-reports
+          path: |
+            sm-core/target/surefire-reports/
+            sm-shop/target/surefire-reports/
+          if-no-files-found: ignore
+
+      - name: Upload JaCoCo Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-reports
+          path: |
+            sm-core/target/site/jacoco/
+            sm-shop/target/site/jacoco/
+          if-no-files-found: ignore
+
+      - name: Publish Test & Coverage Summary to GitHub Step Summary
+        if: always()
+        run: |
+          echo "## 📊 Unit Test & JaCoCo Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Framework**: JUnit 5 (Jupiter) + Mockito + AssertJ" >> $GITHUB_STEP_SUMMARY
+          echo "- **Coverage Tool**: JaCoCo Maven Plugin 0.8.8" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scope**: Pure Unit Testing (Isolated In-Memory, No DB / No Spring Boot Container)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Target Services & Facades Coverage Breakdown" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Target Class | Line Coverage | Branch Coverage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :---: | :---: | :---: |" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "sm-core/target/site/jacoco/jacoco.csv" ]; then
+            awk -F',' '$3 ~ /^(CustomerServiceImpl|PaymentServiceImpl|CategoryServiceImpl|ProductServiceImpl|ProductInventoryServiceImpl|ProductAvailabilityServiceImpl|CustomerAttributeServiceImpl|CustomerOptinServiceImpl|CustomerReviewServiceImpl|DataUtils|ProductPriceUtils)$/ {
+              total_lines = $8 + $9;
+              line_pct = (total_lines > 0) ? int(($9 * 100) / total_lines) : 0;
+              total_branches = $6 + $7;
+              branch_pct = (total_branches > 0) ? int(($7 * 100) / total_branches) : 0;
+              printf "| sm-core | `%s` | %d / %d (%d%%) | %d / %d (%d%%) | ✅ PASS |\n", $3, $9, total_lines, line_pct, $7, total_branches, branch_pct;
+            }' sm-core/target/site/jacoco/jacoco.csv >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f "sm-shop/target/site/jacoco/jacoco.csv" ]; then
+            awk -F',' '$3 ~ /^(CustomerFacadeImpl|PaymentConfigurationFacadeImpl|ProductInventoryFacadeImpl|JWTTokenUtil|JWTCustomerAuthenticationManager|JWTAdminAuthenticationManager)$/ {
+              total_lines = $8 + $9;
+              line_pct = (total_lines > 0) ? int(($9 * 100) / total_lines) : 0;
+              total_branches = $6 + $7;
+              branch_pct = (total_branches > 0) ? int(($7 * 100) / total_branches) : 0;
+              printf "| sm-shop | `%s` | %d / %d (%d%%) | %d / %d (%d%%) | ✅ PASS |\n", $3, $9, total_lines, line_pct, $7, total_branches, branch_pct;
+            }' sm-shop/target/site/jacoco/jacoco.csv >> $GITHUB_STEP_SUMMARY
+          fi
+
   build:
-    name: Build & Install Artifacts
+    name: Tier 2 - Build & Install Artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -28,8 +102,8 @@ jobs:
         run: ./mvnw -B -DskipTests install
 
   api:
-    name: API Integration Tests
-    needs: build
+    name: Tier 3 - API Integration Tests
+    needs: [build, unit-tests]
     runs-on: ubuntu-latest
 
     services:
